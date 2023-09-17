@@ -29,10 +29,6 @@ void SPITask_thread(struct SPITask *task, void *p2, void *p3)
             int res = fs_mount(&task->mp);
         }
 
-        if ((0b10U == (0b10U & event)) != 0U)
-        {
-                }
-
         k_msleep(1000);
     }
 }
