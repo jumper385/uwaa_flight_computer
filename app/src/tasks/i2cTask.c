@@ -5,6 +5,18 @@ void I2CTask_init(struct I2CTask *task)
     AppTask_init((struct AppTask *)task);
     task->baro = DEVICE_DT_GET(DT_NODELABEL(bme280));
     task->imu = DEVICE_DT_GET(DT_NODELABEL(mpu6050));
+
+    if (!device_is_ready(task->baro))
+    {
+        printk("failed to initialize baro\n");
+        return;
+    }
+
+    if (!device_is_ready(task->imu))
+    {
+        printk("failed to initialize imu\n");
+        return;
+    }
 }
 
 // UserSpace Access
@@ -47,11 +59,6 @@ void I2CTask_thread(struct I2CTask *task, void *p2, void *p3)
 
         if ((0b10U == (0b10U & event)) != 0U)
         {
-            if (!device_is_ready(task->baro))
-            {
-                printk("Error setting up baro\n");
-            }
-
             int rc = sensor_sample_fetch(task->baro);
             if (rc != 0)
             {
