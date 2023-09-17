@@ -27,8 +27,26 @@ void SPITask_thread(struct SPITask *task, void *p2, void *p3)
         {
             task->mp.mnt_point = task->disk_mount_pt;
             int res = fs_mount(&task->mp);
+
+            if (res == FR_OK)
+            {
+                printk("Disk mounted...\n");
+            }
+            else
+            {
+                printk("Failed to Mount Disk...\n");
+            }
+
+            res = fs_unmount(&task->mp);
+
+            if (res == 0)
+            {
+                printk("Successfully Unmounted...\n");
+            }
+
+            k_event_clear(&appTask->events, 0b1U);
         }
 
-        k_msleep(1000);
+        k_yield();
     }
 }
