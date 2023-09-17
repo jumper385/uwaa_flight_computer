@@ -1,48 +1,52 @@
-/*
- * Copyright (c) 2021 Nordic Semiconductor ASA
- * SPDX-License-Identifier: Apache-2.0
+/**
+ * 1. Call I2C Readings
+ * 2. Write data to SD Card through SPI on event receive
+ * 3. Spit values through CAN Bus on event receive
  */
 
 #include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <zephyr/drivers/sensor.h>
-#include <app_version.h>
+#include <stdio.h>
 
-#include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
+#include "./tasks/i2cTask.h"
+#include "./tasks/spiTask.h"
+
+struct I2CTask i2cTask;
+struct SPITask spiTask;
+
+K_THREAD_STACK_DEFINE(i2c_task_data, 2048);
+K_THREAD_STACK_DEFINE(spi_task_data, 2048);
 
 int main(void)
 {
-	int ret;
-	const struct device *sensor;
 
-	printk("Zephyr Example Application %s\n", APP_VERSION_STRING);
+	I2CTask_init(&i2cTask);
+	SPITask_init(&spiTask);
 
-	sensor = DEVICE_DT_GET(DT_NODELABEL(examplesensor0));
-	if (!device_is_ready(sensor)) {
-		LOG_ERR("Sensor not ready");
-		return 0;
-	}
+	i2cTask.super.tid = k_thread_create(
+		&i2cTask.super.thread,
+		i2c_task_data, K_THREAD_STACK_SIZEOF(i2c_task_data),
+		I2CTask_thread, &i2cTask, NULL, NULL, 100, 0, K_NO_WAIT);
 
-	while (1) {
-		struct sensor_value val;
+	spiTask.super.tid = k_thread_create(
+		&spiTask.super.thread,
+		spi_task_data, K_THREAD_STACK_SIZEOF(spi_task_data),
+		SPITask_thread, &spiTask, NULL, NULL, 12, 0, K_NO_WAIT);
 
-		ret = sensor_sample_fetch(sensor);
-		if (ret < 0) {
-			LOG_ERR("Could not fetch sample (%d)", ret);
-			return 0;
-		}
+	for (;;)
+	{
+		I2CTask_emit_imu_task(&i2cTask);
+		I2CTask_emit_baro_task(&i2cTask);
+		SPITask_emit_mount_sd(&spiTask);
 
-		ret = sensor_channel_get(sensor, SENSOR_CHAN_PROX, &val);
-		if (ret < 0) {
-			LOG_ERR("Could not get sample (%d)", ret);
-			return 0;
-		}
+		printk("PRESS: %.2f TEMP : %.2f ACCEL_X %.2f\n",
+			   sensor_value_to_float(&i2cTask.pressure),
+			   sensor_value_to_float(&i2cTask.temperature),
+			   sensor_value_to_float(&i2cTask.accel[0]));
 
-		printk("Sensor value: %d\n", val.val1);
-
-		k_sleep(K_MSEC(1000));
+		k_msleep(1000);
 	}
 
 	return 0;
 }
-
