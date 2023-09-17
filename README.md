@@ -46,7 +46,7 @@ command:
 
 ```shell
 # initialize my-workspace for the example-application (main branch)
-west init -m https://github.com/zephyrproject-rtos/example-application --mr main my-workspace
+west init -m https://github.com/jumper385/uwaa_flight_computer --mr main my-workspace
 # update Zephyr modules
 cd my-workspace
 west update
@@ -57,20 +57,7 @@ west update
 To build the application, run the following command:
 
 ```shell
-west build -b $BOARD app
-```
-
-where `$BOARD` is the target board.
-
-You can use the `custom_plank` board found in this
-repository. Note that Zephyr sample boards may be used if an
-appropriate overlay is provided (see `app/boards`).
-
-A sample debug configuration is also provided. To apply it, run the following
-command:
-
-```shell
-west build -b $BOARD app -- -DOVERLAY_CONFIG=debug.conf
+west build -b esp32c3_devkitm app
 ```
 
 Once you have built the application, run the following command to flash it:
