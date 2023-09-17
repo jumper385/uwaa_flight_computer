@@ -27,12 +27,12 @@ int main(void)
 	i2cTask.super.tid = k_thread_create(
 		&i2cTask.super.thread,
 		i2c_task_data, K_THREAD_STACK_SIZEOF(i2c_task_data),
-		I2CTask_thread, &i2cTask, NULL, NULL, 100, 0, K_NO_WAIT);
+		I2CTask_thread, &i2cTask, NULL, NULL, 2, 0, K_NO_WAIT);
 
 	spiTask.super.tid = k_thread_create(
 		&spiTask.super.thread,
 		spi_task_data, K_THREAD_STACK_SIZEOF(spi_task_data),
-		SPITask_thread, &spiTask, NULL, NULL, 12, 0, K_NO_WAIT);
+		SPITask_thread, &spiTask, NULL, NULL, 100, 0, K_NO_WAIT);
 
 	// test: mount the SD Card
 	SPITask_emit_mount_sd(&spiTask); // comment this out to log the imu data...
