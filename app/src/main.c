@@ -20,7 +20,7 @@ K_THREAD_STACK_DEFINE(spi_task_data, 2048);
 
 int main(void)
 {
-
+	// Initialize the threads...
 	I2CTask_init(&i2cTask);
 	SPITask_init(&spiTask);
 
@@ -34,12 +34,17 @@ int main(void)
 		spi_task_data, K_THREAD_STACK_SIZEOF(spi_task_data),
 		SPITask_thread, &spiTask, NULL, NULL, 12, 0, K_NO_WAIT);
 
+	// test: mount the SD Card
+	SPITask_emit_mount_sd(&spiTask); // comment this out to log the imu data...
+
 	for (;;)
 	{
+		// Sample from the Sensors
 		I2CTask_emit_imu_task(&i2cTask);
 		I2CTask_emit_baro_task(&i2cTask);
-		SPITask_emit_mount_sd(&spiTask);
+		// TODO: add csv logging function
 
+		// Print output for now
 		printk("PRESS: %.2f TEMP : %.2f ACCEL_X %.2f\n",
 			   sensor_value_to_float(&i2cTask.pressure),
 			   sensor_value_to_float(&i2cTask.temperature),
