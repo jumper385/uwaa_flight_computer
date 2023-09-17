@@ -42,6 +42,7 @@ int main(void)
 		// Sample from the Sensors
 		I2CTask_emit_imu_task(&i2cTask);
 		I2CTask_emit_baro_task(&i2cTask);
+		SPITask_emit_read_sd(&spiTask);
 		// TODO: add csv logging function
 
 		// Print output for now
