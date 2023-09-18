@@ -18,38 +18,58 @@ struct SPITask spiTask;
 K_THREAD_STACK_DEFINE(i2c_task_data, 2048);
 K_THREAD_STACK_DEFINE(spi_task_data, 2048);
 
+struct device *baro = DEVICE_DT_GET(DT_NODELABEL(bme280));
+struct device *imu = DEVICE_DT_GET(DT_NODELABEL(mpu6050));
+
+struct sensor_value accel[3];
+struct sensor_value gyro[3];
+struct sensor_value temperature;
+struct sensor_value humidity;
+struct sensor_value pressure;
+
 int main(void)
 {
-	// Initialize the threads...
-	I2CTask_init(&i2cTask);
-	SPITask_init(&spiTask);
+	spiTask.mp.type = FS_FATFS;
+	spiTask.mp.fs_data = &spiTask.fat_fs;
+	spiTask.mp.mnt_point = DISK_MOUNT_PT;
 
-	i2cTask.super.tid = k_thread_create(
-		&i2cTask.super.thread,
-		i2c_task_data, K_THREAD_STACK_SIZEOF(i2c_task_data),
-		I2CTask_thread, &i2cTask, NULL, NULL, 2, 0, K_NO_WAIT);
+	int res = fs_mount(&spiTask.mp);
 
-	spiTask.super.tid = k_thread_create(
-		&spiTask.super.thread,
-		spi_task_data, K_THREAD_STACK_SIZEOF(spi_task_data),
-		SPITask_thread, &spiTask, NULL, NULL, 100, 0, K_NO_WAIT);
+	if (res == FR_OK)
+	{
+		printk("Disk mounted...\n");
+	}
+	else
+	{
+		printk("Failed to Mount Disk...\n");
+	}
 
-	// test: mount the SD Card
-	SPITask_emit_mount_sd(&spiTask); // comment this out to log the imu data...
+	res = fs_unmount(&spiTask.mp);
+
+	if (res != 0)
+	{
+		printk("Failed to unmount...\n");
+	}
 
 	for (;;)
 	{
-		// Sample from the Sensors
-		I2CTask_emit_imu_task(&i2cTask);
-		I2CTask_emit_baro_task(&i2cTask);
-		SPITask_emit_read_sd(&spiTask);
-		// TODO: add csv logging function
+		int rc = sensor_sample_fetch(imu);
+
+		if (rc != 0)
+		{
+			printk("failed to fetch from baro\n");
+		}
+
+		rc = sensor_channel_get(imu, SENSOR_CHAN_ACCEL_XYZ, accel);
+		rc = sensor_channel_get(imu, SENSOR_CHAN_GYRO_XYZ, gyro);
+
+		if (rc != 0)
+		{
+			printk("failed to get get baro\n");
+		}
 
 		// Print output for now
-		printk("PRESS: %.2f TEMP : %.2f ACCEL_X %.2f\n",
-			   sensor_value_to_float(&i2cTask.pressure),
-			   sensor_value_to_float(&i2cTask.temperature),
-			   sensor_value_to_float(&i2cTask.accel[0]));
+		printk(" ACCEL_X %.2f\n", sensor_value_to_float(&accel[0]));
 
 		k_msleep(1000);
 	}
