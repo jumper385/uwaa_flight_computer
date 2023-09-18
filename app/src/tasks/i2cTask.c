@@ -28,8 +28,6 @@ int I2CTask_getImuData(struct I2CTask *task)
         printk("failed to fetch from IMU\n");
     }
 
-    rc = sensor_channel_get(task->imu, SENSOR_CHAN_ACCEL_XYZ, &task->accel);
-    rc = sensor_channel_get(task->imu, SENSOR_CHAN_GYRO_XYZ, &task->gyro);
 
     if (rc != 0)
     {

@@ -15,8 +15,8 @@
 struct I2CTask i2cTask;
 struct SPITask spiTask;
 
-K_THREAD_STACK_DEFINE(i2c_task_data, 2048);
-K_THREAD_STACK_DEFINE(spi_task_data, 2048);
+// K_THREAD_STACK_DEFINE(i2c_task_data, 2048);
+// K_THREAD_STACK_DEFINE(spi_task_data, 2048);
 
 struct device *baro = DEVICE_DT_GET(DT_NODELABEL(bme280));
 struct device *imu = DEVICE_DT_GET(DT_NODELABEL(mpu6050));
@@ -32,8 +32,8 @@ int main(void)
 	spiTask.mp.type = FS_FATFS;
 	spiTask.mp.fs_data = &spiTask.fat_fs;
 	spiTask.mp.mnt_point = DISK_MOUNT_PT;
-
-	int res = fs_mount(&spiTask.mp);
+	int res;
+	res = fs_mount(&spiTask.mp);
 
 	if (res == FR_OK)
 	{
@@ -53,23 +53,17 @@ int main(void)
 
 	for (;;)
 	{
-		int rc = sensor_sample_fetch(imu);
+		int rc = sensor_sample_fetch(baro);
+		rc = sensor_sample_fetch(imu);
 
-		if (rc != 0)
-		{
-			printk("failed to fetch from baro\n");
-		}
+		rc = sensor_channel_get(baro, SENSOR_CHAN_PRESS, &pressure);
+		rc = sensor_channel_get(baro, SENSOR_CHAN_AMBIENT_TEMP, &temperature);
+		rc = sensor_channel_get(baro, SENSOR_CHAN_HUMIDITY, &humidity);
 
-		rc = sensor_channel_get(imu, SENSOR_CHAN_ACCEL_XYZ, accel);
-		rc = sensor_channel_get(imu, SENSOR_CHAN_GYRO_XYZ, gyro);
+		rc = sensor_channel_get(imu, SENSOR_CHAN_ACCEL_XYZ, &accel);
+		rc = sensor_channel_get(imu, SENSOR_CHAN_GYRO_XYZ, &gyro);
 
-		if (rc != 0)
-		{
-			printk("failed to get get baro\n");
-		}
-
-		// Print output for now
-		printk(" ACCEL_X %.2f\n", sensor_value_to_float(&accel[0]));
+		printk("%.2f\n", sensor_value_to_float(&accel[0]));
 
 		k_msleep(1000);
 	}
