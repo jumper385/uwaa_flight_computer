@@ -7,9 +7,9 @@
 .venv
 
 # build
-*/build*
+**/build*
 /twister-out*
 
-*.DS_Store
+**/*.DS_Store
 
 __pycache__/
