@@ -4,12 +4,13 @@
             pinmux = <SPIM2_MISO_GPIO5>,
                      <SPIM2_SCLK_GPIO4>,
                      <SPIM2_MOSI_GPIO3>;
+            bias-pull-up;
         };
     };
     i2c0_default: i2c0_default {
         group1 {
             pinmux = <I2C0_SCL_GPIO6>,
-                     <I2C0_SDA_GPIO7>;
+                     <I2C0_SDA_GPIO10>;
             bias-pull-up;
         };
     };
