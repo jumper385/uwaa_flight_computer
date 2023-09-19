@@ -56,16 +56,22 @@ int main(void)
 
 		if ((0b100U == (0b100U & event)) != 0U)
 		{
-			LOG_INF("%lld,%s,%.3f,%.3f,%.3f\r\n", k_uptime_get(), "IMU",
-					sensor_value_to_float(&i2cTask.accel[1]),
-					sensor_value_to_float(&i2cTask.accel[2]),
-					sensor_value_to_float(&i2cTask.accel[3]));
+			LOG_INF("%lld,%s,%.3f,%.3f,%.3f,%3f,%3f,%3f\r\n", k_uptime_get(), "IMU",
+					sensor_value_to_double(&i2cTask.accel[0]),
+					sensor_value_to_double(&i2cTask.accel[1]),
+					sensor_value_to_double(&i2cTask.accel[2]),
+					sensor_value_to_double(&i2cTask.gyro[0]),
+					sensor_value_to_double(&i2cTask.gyro[1]),
+					sensor_value_to_double(&i2cTask.gyro[2]));
 
 			char buf[100];
-			sprintf(buf, "%lld,%s,%.3f,%.3f,%.3f\r\n", k_uptime_get(), "IMU",
-					sensor_value_to_float(&i2cTask.accel[1]),
-					sensor_value_to_float(&i2cTask.accel[2]),
-					sensor_value_to_float(&i2cTask.accel[3]));
+			sprintf(buf, "%lld,%s,%.3f,%.3f,%.3f,%3f,%3f,%3f\r\n", k_uptime_get(), "IMU",
+					sensor_value_to_double(&i2cTask.accel[0]),
+					sensor_value_to_double(&i2cTask.accel[1]),
+					sensor_value_to_double(&i2cTask.accel[2]),
+					sensor_value_to_double(&i2cTask.gyro[0]),
+					sensor_value_to_double(&i2cTask.gyro[1]),
+					sensor_value_to_double(&i2cTask.gyro[2]));
 
 			SPITask_fn_write_sd(&spiTask, &buf, "/SD:/imu.csv");
 
@@ -75,15 +81,15 @@ int main(void)
 		if ((0b1000U == (0b1000U & event)) != 0U)
 		{
 			LOG_INF("%lld,%s,%.3f,%.3f,%.3f\r\n", k_uptime_get(), "BARO",
-					sensor_value_to_float(&i2cTask.pressure),
-					sensor_value_to_float(&i2cTask.temperature),
-					sensor_value_to_float(&i2cTask.humidity));
+					sensor_value_to_double(&i2cTask.pressure),
+					sensor_value_to_double(&i2cTask.temperature),
+					sensor_value_to_double(&i2cTask.humidity));
 
 			char buf[100];
 			sprintf(buf, "%lld,%s,%.8f,%.3f,%.3f\r\n", k_uptime_get(), "BARO",
-					sensor_value_to_float(&i2cTask.pressure),
-					sensor_value_to_float(&i2cTask.temperature),
-					sensor_value_to_float(&i2cTask.humidity));
+					sensor_value_to_double(&i2cTask.pressure),
+					sensor_value_to_double(&i2cTask.temperature),
+					sensor_value_to_double(&i2cTask.humidity));
 
 			SPITask_fn_write_sd(&spiTask, &buf, "/SD:/baro.csv");
 
