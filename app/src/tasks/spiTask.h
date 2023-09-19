@@ -26,13 +26,13 @@ struct SPITask
     char *disk_mount_pt;
     char *disk_pdrv;
     struct fs_file_t file;
+
+    // data buffers
+    char *imu_buf;
+    char *baro_buf;
 };
 
-void SPITask_init(struct SPITask *task);
-void SPITask_thread(struct SPITask *task, void *p2, void *p3);
-void SPITask_emit_mount_sd(struct SPITask *task);
-void SPITask_emit_write_sd(struct SPITask *task);
 void SPITask_fn_mount_sd(struct SPITask *task);
-void SPITask_fn_write_sd(struct SPITask *task, char *data);
+void SPITask_fn_write_sd(struct SPITask *task, char *data, char *fname);
 
 #endif

@@ -47,7 +47,6 @@ int main(void)
 
 	k_timer_start(&sample_timer, K_NO_WAIT, K_MSEC(100));
 
-	// Mount the Drive...
 	SPITask_fn_mount_sd(&spiTask);
 
 	for (;;)
@@ -57,34 +56,38 @@ int main(void)
 
 		if ((0b100U == (0b100U & event)) != 0U)
 		{
-			LOG_INF("ax:%.2f; ay:%.2f; az:%.2f;",
-					sensor_value_to_float(&i2cTask.accel[0]),
+			LOG_INF("%lld,%s,%.3f,%.3f,%.3f\r\n", k_uptime_get(), "IMU",
 					sensor_value_to_float(&i2cTask.accel[1]),
-					sensor_value_to_float(&i2cTask.accel[2]));
+					sensor_value_to_float(&i2cTask.accel[2]),
+					sensor_value_to_float(&i2cTask.accel[3]));
+
+			char buf[100];
+			sprintf(buf, "%lld,%s,%.3f,%.3f,%.3f\r\n", k_uptime_get(), "IMU",
+					sensor_value_to_float(&i2cTask.accel[1]),
+					sensor_value_to_float(&i2cTask.accel[2]),
+					sensor_value_to_float(&i2cTask.accel[3]));
+
+			SPITask_fn_write_sd(&spiTask, &buf, "/SD:/imu.csv");
+
 			k_event_clear(&i2cTask.super.events, 0b100U);
-
-			sprintf(data, "ax:%.2f; ay:%.2f; az:%.2f;\r\n",
-					sensor_value_to_float(&i2cTask.accel[0]),
-					sensor_value_to_float(&i2cTask.accel[1]),
-					sensor_value_to_float(&i2cTask.accel[2]));
-
-			SPITask_fn_write_sd(&spiTask, data);
 		}
 
 		if ((0b1000U == (0b1000U & event)) != 0U)
 		{
-			LOG_INF("pressure:%.2f; temperature:%.2f; humidity:%.2f;",
+			LOG_INF("%lld,%s,%.3f,%.3f,%.3f\r\n", k_uptime_get(), "BARO",
 					sensor_value_to_float(&i2cTask.pressure),
 					sensor_value_to_float(&i2cTask.temperature),
 					sensor_value_to_float(&i2cTask.humidity));
+
+			char buf[100];
+			sprintf(buf, "%lld,%s,%.8f,%.3f,%.3f\r\n", k_uptime_get(), "BARO",
+					sensor_value_to_float(&i2cTask.pressure),
+					sensor_value_to_float(&i2cTask.temperature),
+					sensor_value_to_float(&i2cTask.humidity));
+
+			SPITask_fn_write_sd(&spiTask, &buf, "/SD:/baro.csv");
+
 			k_event_clear(&i2cTask.super.events, 0b1000U);
-
-			sprintf(data, "pressure:%.2f; temperature:%.2f; humidity:%.2f;",
-					sensor_value_to_float(&i2cTask.pressure),
-					sensor_value_to_float(&i2cTask.temperature),
-					sensor_value_to_float(&i2cTask.humidity));
-
-			SPITask_fn_write_sd(&spiTask, data);
 		}
 
 		k_usleep(100);

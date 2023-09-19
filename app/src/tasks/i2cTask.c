@@ -104,6 +104,6 @@ void I2CTask_thread(struct I2CTask *task, void *p2, void *p3)
             k_event_post(&appTask->events, 0b1000U);
         }
 
-        k_yield();
+        k_usleep(100);
     }
 }
