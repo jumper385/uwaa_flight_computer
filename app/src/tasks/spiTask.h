@@ -25,15 +25,14 @@ struct SPITask
     struct fs_mount_t mp;
     char *disk_mount_pt;
     char *disk_pdrv;
-    uint64_t memory_size_mb;
-    uint32_t block_count;
-    uint32_t block_size;
     struct fs_file_t file;
 };
 
 void SPITask_init(struct SPITask *task);
 void SPITask_thread(struct SPITask *task, void *p2, void *p3);
 void SPITask_emit_mount_sd(struct SPITask *task);
-void SPITask_emit_read_sd(struct SPITask *task);
+void SPITask_emit_write_sd(struct SPITask *task);
+void SPITask_fn_mount_sd(struct SPITask *task);
+void SPITask_fn_write_sd(struct SPITask *task, char *data);
 
 #endif

@@ -88,6 +88,7 @@ void I2CTask_thread(struct I2CTask *task, void *p2, void *p3)
             }
 
             k_event_clear(&appTask->events, 0b1U);
+            k_event_post(&appTask->events, 0b100U);
         }
 
         if ((0b10U == (0b10U & event)) != 0U)
@@ -100,6 +101,7 @@ void I2CTask_thread(struct I2CTask *task, void *p2, void *p3)
             }
 
             k_event_clear(&appTask->events, 0b10U);
+            k_event_post(&appTask->events, 0b1000U);
         }
 
         k_yield();
