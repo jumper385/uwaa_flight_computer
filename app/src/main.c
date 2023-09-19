@@ -47,7 +47,12 @@ int main(void)
 
 	k_timer_start(&sample_timer, K_NO_WAIT, K_MSEC(100));
 
+	struct gpio_dt_spec red_led = GPIO_DT_SPEC_GET(DT_NODELABEL(led_red), gpios);
+	int ret = gpio_pin_configure_dt(&red_led, GPIO_OUTPUT_INACTIVE);
+
 	SPITask_fn_mount_sd(&spiTask);
+
+	ret = gpio_pin_set_dt(&red_led, 1);
 
 	for (;;)
 	{
